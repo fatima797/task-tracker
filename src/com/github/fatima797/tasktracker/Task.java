@@ -1,0 +1,92 @@
+package com.github.fatima797.tasktracker;
+
+import java.time.LocalDateTime;
+
+public class Task {
+	private final int id;
+	private String description;
+	private Status status; // "todo", "in-progress", "done"
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+
+	// This constructor is for creating new tasks
+	public Task(int id, String description) {
+		this.id = id;
+		this.description = description;
+		this.status = Status.TODO; // every new task has 'todo' starting state
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
+
+
+	// This constructor is for reconstructing tasks when loading from JSON
+	public Task(int id, String description, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.id = id;
+		this.description = description;
+		this.status = status;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
+
+	// Static factory method for reconstructing existing tasks
+	public static Task restore(int id, String description, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		return new Task(id, description, status, createdAt, updatedAt);
+	}
+
+
+	public int getId() {
+		return id;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+	public Status getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+
+	// Helpers
+	public void updateTimestamp() {
+		this.updatedAt = LocalDateTime.now();
+	}
+
+
+	@Override
+	public String toString() {
+		return "[" + id + "] " + description + " " + status + " - Created:" + createdAt;
+	}
+
+	public String toJson() {
+
+		return  "{"
+				+ "\"id\": " + getId() + ","
+				+ "\"description\": \"" + getDescription() + "\","
+				+ "\"status\": \"" + getStatus() + "\""
+				+ "}";
+	}
+
+
+}
