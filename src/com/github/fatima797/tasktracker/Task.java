@@ -3,11 +3,15 @@ package com.github.fatima797.tasktracker;
 import java.time.LocalDateTime;
 
 public class Task {
-	private final int id;
+	private int id;
 	private String description;
 	private Status status; // "todo", "in-progress", "done"
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+
+	public Task () {
+	}
+
 
 	// This constructor is for creating new tasks
 	public Task(int id, String description) {
@@ -81,11 +85,16 @@ public class Task {
 
 	public String toJson() {
 
-		return  "{"
-				+ "\"id\": " + getId() + ","
-				+ "\"description\": \"" + getDescription() + "\","
-				+ "\"status\": \"" + getStatus() + "\""
-				+ "}";
+		StringBuilder sb = new StringBuilder();
+		sb.append("{\n");
+		sb.append("\"id\": ").append(id).append(",\n");
+		sb.append("\"description\": \"").append(description).append("\",\n");
+		sb.append("\"status\": \"").append(status).append("\",\n");
+		sb.append("\"createdAt\": \"").append(createdAt).append("\",\n");
+		sb.append("\"updatedAt\": \"").append(updatedAt).append("\"\n");
+		sb.append("}");
+		
+		return sb.toString();
 	}
 
 
