@@ -1,6 +1,6 @@
 # Task Tracker
 
-A simple command-line Task Tracker application built in Java. This tool allows users to manage their tasks directly from the terminal — including adding, updating, deleting, and marking tasks as done or in progress. Tasks are stored persistently in a JSON file.
+A simple command-line Task Tracker application built in Java. This tool allows users to manage their tasks directly from the terminal — including adding, updating, deleting, and marking tasks as done or in progress. Tasks are stored persistently in a JSON file. 
 
 ---
 
@@ -34,38 +34,59 @@ cd task-tracker
 To run the project, use:
 
 ```bash
-java -jar task-tracker.jar
+java -jar task-tracker.jar <command> [arguments]
+```
+
+💡 Example Usage
+
+### Add a task
+```bash
+java -jar task-tracker.jar add "Buy groceries"
+```
+
+### Updating and deleting tasks
+```bash
+java -jar task-tracker.jar update 1 "Buy groceries and cook dinner"
+java -jar task-tracker.jar delete 1
+```
+
+### Mark a task as in progress or done
+```bash
+java -jar task-tracker.jar mark-in-progress 1
+java -jar task-tracker.jar mark-done 1
+```
+
+### List all tasks
+```bash
+java -jar task-tracker.jar list
+```
+
+### List only by status
+```bash
+java -jar task-tracker.jar list done
+java -jar task-tracker.jar list todo
+java -jar task-tracker.jar list in-progress
 ```
 
 ---
 
-💡 Example Usage
+## 🟢 Project Status: In Progress
 
-# Add a task
-java -jar task-tracker.jar add "Buy groceries"
+### ✅ Completed Features:  
 
-# Updating and deleting tasks
-java -jar task-tracker.jar update 1 "Buy groceries and cook dinner"
-java -jar task-tracker.jar delete 1
+- Add new tasks
+- Persist tasks to JSON file
+- Load existing tasks from JSON file
+- Assign incremental IDs to tasks
 
-# Mark a task as in progress or done
-java -jar task-tracker.jar mark-in-progress 1
-java -jar task-tracker.jar mark-done 1
+### Next Feature:
 
-# List all tasks
-java -jar task-tracker.jar list
-
-# List only by status
-java -jar task-tracker.jar list done
-java -jar task-tracker.jar list todo
-java -jar task-tracker.jar list in-progress
+Implement ```updateTask()``` and ```deleteTask()``` methods to allow task editing and removal.
 
 ---
 
-🌐 Project Repository
+## 🌐 Project Repository
 You can view the project repository here: 
 https://github.com/fatima797/task-tracker
-
-
 
 
