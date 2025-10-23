@@ -80,7 +80,7 @@ public class Task {
 
 	@Override
 	public String toString() {
-		return "[" + id + "] " + description + " " + status + " - Created:" + createdAt;
+		return "[" + id + "] " + description + " " + status + " - createdAt: " + createdAt + " " + "updatedAt: " + updatedAt;
 	}
 
 	public String toJson() {

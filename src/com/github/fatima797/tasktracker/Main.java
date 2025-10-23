@@ -14,13 +14,12 @@ public class Main {
 				System.out.println("Unknown command: " + args[0]);
 			}
 		}else if(args.length == 0) {
-			System.out.println("Usage: java -jar task-cli.jar <command> [arguments]");
+			System.out.println("Usage: java -jar task-tracker.jar <command> [arguments]");
 		}else if(args.length == 1) {
 			System.out.println("Missing task description. Usage: 'add \\\"<description>\\\"'");
 		}else {
 			System.out.println("Invalid number of arguments");
-		}
-
+		}		
 
 	}
 
