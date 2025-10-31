@@ -202,4 +202,28 @@ public class TaskManager {
 		}
 	}
 
+	public void deleteTask(int id) {
+		// Flag to track if task was found and removed
+		boolean found = false;
+			
+			for(int i = 0; i < tasks.size(); i++) {
+				
+				Task task = tasks.get(i);
+				if(task.getId() == id) {
+					tasks.remove(i);
+					System.out.println("Task " + task.getId() + " deleted successfully");
+					found = true;
+					break;
+				}
+			}
+			
+			// Only persist change if a task was found
+			if(found) {
+				saveTasks();
+			}else {
+				System.out.println("Task with id " + id + " not found.");
+			}
+			
+	}
+
 }

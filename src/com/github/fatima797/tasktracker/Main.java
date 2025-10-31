@@ -10,7 +10,10 @@ public class Main {
 		if(args.length == 2) {
 			if(args[0].equals("add")) {
 				taskManager.addTask(args[1]);
-			}else {
+			}else if(args[0].equals("delete")) {
+				taskManager.deleteTask(Integer.parseInt(args[1]));
+			}
+			else {
 				System.out.println("Unknown command: " + args[0]);
 			}
 		}else if(args.length == 0) {
