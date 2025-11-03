@@ -12,9 +12,12 @@ public class Main {
 				taskManager.addTask(args[1]);
 			}else if(args[0].equals("delete")) {
 				taskManager.deleteTask(Integer.parseInt(args[1]));
-			}
-			else {
+			}else {
 				System.out.println("Unknown command: " + args[0]);
+			}
+		}else if(args.length == 3) {
+			if(args[0].equals("update")) {
+				taskManager.updateTask(Integer.parseInt(args[1]), args[2]);
 			}
 		}else if(args.length == 0) {
 			System.out.println("Usage: java -jar task-tracker.jar <command> [arguments]");
