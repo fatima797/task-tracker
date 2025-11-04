@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -245,4 +246,37 @@ public class TaskManager {
 		}
 	}
 
+	public void listByStatus(String statusInput) {
+		// Convert Status and perform error checking 
+		Status desiredStatus;
+		try {
+			// Convert to enum and store the result
+			desiredStatus = Status.valueOf(statusInput.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error: Invalid status. Valid options are: " + Arrays.toString(Status.values()));
+			return; // Exit if the input is invalid
+		}
+
+		if(tasks.isEmpty()) {
+			System.out.println("No tasks available.");
+			return;
+		}
+
+		System.out.println("=== Tasks with status: " + desiredStatus.name() + " ===");
+		boolean found = false;
+
+		// Loop and Filter
+		for(Task task : tasks) {
+			// Check if task's actual status matches the pre-converted desiredStatus
+			if(task.getStatus() == desiredStatus) {
+				System.out.println(task.toDisplayString());
+				found = true;
+			}
+		}
+
+		// Print Not Found Message (if necessary)
+		if(!found) {
+			System.out.println("No task found with status: " + desiredStatus.name());
+		}
+	}
 }

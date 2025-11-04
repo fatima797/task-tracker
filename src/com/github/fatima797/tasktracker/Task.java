@@ -96,6 +96,10 @@ public class Task {
 		
 		return sb.toString();
 	}
+	
+	public String toDisplayString() {
+		return "[" + id + "] " + description + " (" + status + ") - Created: " + createdAt + " Updated: " + updatedAt;
+	}
 
 
 }
