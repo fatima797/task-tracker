@@ -279,4 +279,17 @@ public class TaskManager {
 			System.out.println("No task found with status: " + desiredStatus.name());
 		}
 	}
+
+	public void listAll() {
+		if (tasks.isEmpty()) {
+	        System.out.println("No tasks available.");
+	        return;
+	    }
+		
+		System.out.println("=== All Tasks ===");
+		for (Task task : tasks) {
+			System.out.println(task.toDisplayString());
+
+		}
+	}
 }
