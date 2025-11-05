@@ -91,5 +91,14 @@ java -jar task-tracker.jar list in-progress
 
 ## 🌐 Project Repository
 
-You can view the project repository here:
-https://github.com/fatima797/task-tracker
+[You can view the project repository here](https://github.com/fatima797/task-tracker)
+
+---
+
+## 🔗 Project Challenge Source
+
+This project is a solution to the **Task Tracker** challenge provided by roadmap.sh.
+
+[View the original challenge instructions here](https://roadmap.sh/projects/task-tracker)
+
+---
