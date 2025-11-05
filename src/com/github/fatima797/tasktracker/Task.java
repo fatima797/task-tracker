@@ -98,7 +98,7 @@ public class Task {
 	}
 	
 	public String toDisplayString() {
-		return "[" + id + "] " + description + " (" + status + ") - Created: " + createdAt + " Updated: " + updatedAt;
+		return "[" + id + "] " + description + " (" + status + ") - Created: " + createdAt + " - Updated: " + updatedAt;
 	}
 
 

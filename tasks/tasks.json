@@ -2,22 +2,22 @@
 {
 "id": 1,
 "description": "Buy groceries and cook dinner",
-"status": "TODO",
+"status": "IN_PROGRESS",
 "createdAt": "2025-10-23T11:10:37.526",
-"updatedAt": "2025-11-01T16:00:40.083"
+"updatedAt": "2025-11-05T12:19:47.312"
 },
 {
 "id": 2,
 "description": "Walk dog",
-"status": "DONE",
+"status": "TODO",
 "createdAt": "2025-11-03T09:35:35.539",
-"updatedAt": "2025-11-03T09:35:35.541"
+"updatedAt": "2025-11-05T11:32:41.209"
 },
 {
 "id": 3,
 "description": "Pay phone bill",
-"status": "TODO",
+"status": "DONE",
 "createdAt": "2025-11-04T13:38:49.196",
-"updatedAt": "2025-11-04T13:38:49.197"
+"updatedAt": "2025-11-05T11:45:28.951"
 }
 ]

@@ -82,14 +82,10 @@ java -jar task-tracker.jar list in-progress
 - **Add** new tasks.
 - **Delete** task by ID and update the `tasks.json` file.
 - **Update** task description by ID.
+- **Mark** a task as IN_PROGRESS or DONE by ID.
 - **List** all tasks.
 - **Filter** and list tasks by status (e.g., TODO, IN_PROGRESS, DONE).
 - Manage task persistence (load/save) via the `tasks.json` file.
-- Ensure ID continuity by loading the highest ID and assigning incremental IDs to new tasks.
-
-### Next Feature:
-
-Implement functionality to **mark a task as 'IN_PROGRESS' or 'DONE'** by ID.
 
 ---
 

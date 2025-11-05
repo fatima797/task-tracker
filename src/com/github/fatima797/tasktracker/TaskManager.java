@@ -292,4 +292,34 @@ public class TaskManager {
 
 		}
 	}
+	
+	public void updateTaskStatus(int id, Status newStatus) {
+		boolean found = false;
+		
+		for(Task task : tasks) {
+			if(task.getId() == id) {
+				task.setStatus(newStatus);
+				task.updateTimestamp();
+				found = true;
+				break;
+			}
+		}
+		
+		if(found) {
+			saveTasks();
+			System.out.println("Task " + id + " marked as " + newStatus);
+		}else {
+			System.out.println("Task " + id + " not found.");
+		}
+		
+	}
+	
+	public void markTaskAsDone(int id) {
+		updateTaskStatus(id, Status.DONE);
+		
+	}
+	
+	public void markInProgress(int id) {
+		updateTaskStatus(id, Status.IN_PROGRESS);
+	}
 }
