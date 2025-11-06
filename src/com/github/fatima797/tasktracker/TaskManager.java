@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.github.fatima797.tasktracker.model.Status;
+import com.github.fatima797.tasktracker.model.Task;
+
 public class TaskManager {
 	private static final String FILEPATH = "tasks/tasks.json";
 	private List<Task> tasks = new ArrayList<>();

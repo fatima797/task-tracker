@@ -1,4 +1,4 @@
-package com.github.fatima797.tasktracker;
+package com.github.fatima797.tasktracker.model;
 
 public enum Status {
 	TODO,
