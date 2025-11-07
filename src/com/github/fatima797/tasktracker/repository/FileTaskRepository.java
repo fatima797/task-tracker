@@ -1,4 +1,4 @@
-package com.github.fatima797.tasktracker;
+package com.github.fatima797.tasktracker.repository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -8,38 +8,20 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.github.fatima797.tasktracker.model.Status;
 import com.github.fatima797.tasktracker.model.Task;
 
-public class TaskManager {
+public class FileTaskRepository implements TaskRepository{
 	private static final String FILEPATH = "tasks/tasks.json";
-	private List<Task> tasks = new ArrayList<>();
-	private AtomicInteger nextId = new AtomicInteger(0);
+	private List<Task> tasksFromFile = new ArrayList<>();
+	
+	public FileTaskRepository() {
 
-	public TaskManager() {
-		loadTasks();
 	}
-
-	public void addTask(String description) {
-
-		// Generate unique ID based on highest existing task ID
-		int newId = generateId();
-		Task newTask = new Task(newId, description);
-		// Add new task to in-memory list
-		tasks.add(newTask);
-
-		// Save task list to JSON file
-		saveTasks();
-
-		System.out.println("Task added successfully (ID: " + newTask.getId() + ")");
-	}
-
-
-	public void saveTasks() {
+	
+	@Override
+	public void save(List<Task> tasks) {
 		Path path = Paths.get(FILEPATH);
 
 		// Use StringBuilder to construct JSON string
@@ -76,23 +58,18 @@ public class TaskManager {
 			e.printStackTrace();
 		}
 
-
 	}
-
-	private int generateId() {
-		int id = nextId.incrementAndGet();
-		return id;
-	}
-
-	public void loadTasks() {
-		tasks.clear();
+	
+	@Override
+	public List<Task> load() {
+		tasksFromFile.clear();
 
 		// Define file path where tasks are stored
 		Path path = Paths.get(FILEPATH);
 
 
 		if (!Files.exists(path)) {
-			return;
+			return tasksFromFile;
 		}
 
 		try {
@@ -101,7 +78,7 @@ public class TaskManager {
 
 			// If file is empty, no tasks to load
 			if(lines.isEmpty()) {
-				return;
+				return tasksFromFile;
 			}
 
 			// Accumulate all lines into StringBuilder for parsing
@@ -189,7 +166,7 @@ public class TaskManager {
 							LocalDateTime.parse(updatedAt));
 
 					// Add constructed Task to in-memory task list
-					tasks.add(task);
+					tasksFromFile.add(task);
 
 				} catch (Exception e) {
 					System.out.println("Failed to parse a task. Skipping it.");
@@ -197,132 +174,12 @@ public class TaskManager {
 				}
 			}
 
-			// Set highestId to be used to generate next ID in generateId()
-			nextId.set(highestId);
-
 		} catch (IOException e) {
 			System.out.println("Failed to read tasks.json");
 			e.printStackTrace();
 		}
-	}
-
-	public void deleteTask(int id) {
-		// Flag to track if task was found and removed
-		boolean found = false;
-
-		for(int i = 0; i < tasks.size(); i++) {
-
-			Task task = tasks.get(i);
-			if(task.getId() == id) {
-				tasks.remove(i);
-				System.out.println("Task " + task.getId() + " deleted successfully");
-				found = true;
-				break;
-			}
-		}
-
-		// Only persist change if a task was found
-		if(found) {
-			saveTasks();
-		}else {
-			System.out.println("Task with id " + id + " not found.");
-		}	
-	}
-
-	public void updateTask(int id, String newDescription) {
-		boolean found = false;
-
-		for(Task task : tasks) {
-			if(task.getId() == id) {
-				task.setDescription(newDescription);
-				task.updateTimestamp();
-				found = true;
-				break;
-			}
-		}
-
-		if(found) {
-			saveTasks();
-			System.out.println("Task ID " + id + " updated successfully.");
-		}else {
-			System.out.println("Task ID " + id + " not found.");
-		}
-	}
-
-	public void listByStatus(String statusInput) {
-		// Convert Status and perform error checking 
-		Status desiredStatus;
-		try {
-			// Convert to enum and store the result
-			desiredStatus = Status.valueOf(statusInput.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			System.out.println("Error: Invalid status. Valid options are: " + Arrays.toString(Status.values()));
-			return; // Exit if the input is invalid
-		}
-
-		if(tasks.isEmpty()) {
-			System.out.println("No tasks available.");
-			return;
-		}
-
-		System.out.println("=== Tasks with status: " + desiredStatus.name() + " ===");
-		boolean found = false;
-
-		// Loop and Filter
-		for(Task task : tasks) {
-			// Check if task's actual status matches the pre-converted desiredStatus
-			if(task.getStatus() == desiredStatus) {
-				System.out.println(task.toDisplayString());
-				found = true;
-			}
-		}
-
-		// Print Not Found Message (if necessary)
-		if(!found) {
-			System.out.println("No task found with status: " + desiredStatus.name());
-		}
-	}
-
-	public void listAll() {
-		if (tasks.isEmpty()) {
-	        System.out.println("No tasks available.");
-	        return;
-	    }
 		
-		System.out.println("=== All Tasks ===");
-		for (Task task : tasks) {
-			System.out.println(task.toDisplayString());
+		return tasksFromFile;
+	}
 
-		}
-	}
-	
-	public void updateTaskStatus(int id, Status newStatus) {
-		boolean found = false;
-		
-		for(Task task : tasks) {
-			if(task.getId() == id) {
-				task.setStatus(newStatus);
-				task.updateTimestamp();
-				found = true;
-				break;
-			}
-		}
-		
-		if(found) {
-			saveTasks();
-			System.out.println("Task " + id + " marked as " + newStatus);
-		}else {
-			System.out.println("Task " + id + " not found.");
-		}
-		
-	}
-	
-	public void markTaskAsDone(int id) {
-		updateTaskStatus(id, Status.DONE);
-		
-	}
-	
-	public void markInProgress(int id) {
-		updateTaskStatus(id, Status.IN_PROGRESS);
-	}
 }

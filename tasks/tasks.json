@@ -16,8 +16,15 @@
 {
 "id": 3,
 "description": "Pay phone bill",
-"status": "DONE",
+"status": "IN_PROGRESS",
 "createdAt": "2025-11-04T13:38:49.196",
-"updatedAt": "2025-11-05T11:45:28.951"
+"updatedAt": "2025-11-07T17:10:00.764"
+},
+{
+"id": 4,
+"description": "Call mom",
+"status": "TODO",
+"createdAt": "2025-11-07T17:10:27.216",
+"updatedAt": "2025-11-07T17:10:27.218"
 }
 ]

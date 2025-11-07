@@ -12,8 +12,6 @@ public class Task {
 	public Task () {
 	}
 
-
-	// This constructor is for creating new tasks
 	public Task(int id, String description) {
 		this.id = id;
 		this.description = description;
@@ -100,6 +98,5 @@ public class Task {
 	public String toDisplayString() {
 		return "[" + id + "] " + description + " (" + status + ") - Created: " + createdAt + " - Updated: " + updatedAt;
 	}
-
 
 }

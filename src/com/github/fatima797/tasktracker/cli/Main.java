@@ -1,9 +1,13 @@
-package com.github.fatima797.tasktracker;
+package com.github.fatima797.tasktracker.cli;
+
+import com.github.fatima797.tasktracker.repository.FileTaskRepository;
+import com.github.fatima797.tasktracker.service.TaskManager;
 
 public class Main {
 
 	public static void main(String[] args) {
-		TaskManager taskManager = new TaskManager();
+		FileTaskRepository repository = new FileTaskRepository();
+		TaskManager taskManager = new TaskManager(repository);
 
 		switch (args.length) {
 		case 0:
