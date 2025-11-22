@@ -2,12 +2,14 @@ package com.github.fatima797.tasktracker.cli;
 
 import com.github.fatima797.tasktracker.repository.FileTaskRepository;
 import com.github.fatima797.tasktracker.service.TaskManager;
+import com.github.fatima797.tasktracker.view.ConsoleView;
 
 public class Main {
 
 	public static void main(String[] args) {
 		FileTaskRepository repository = new FileTaskRepository();
-		TaskManager taskManager = new TaskManager(repository);
+		ConsoleView view = new ConsoleView();
+		TaskManager taskManager = new TaskManager(repository, view);
 
 		switch (args.length) {
 		case 0:

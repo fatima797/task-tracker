@@ -8,14 +8,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.github.fatima797.tasktracker.model.Status;
 import com.github.fatima797.tasktracker.model.Task;
 import com.github.fatima797.tasktracker.repository.TaskRepository;
+import com.github.fatima797.tasktracker.view.ConsoleView;
 
 public class TaskManager {
 	private final TaskRepository repository;
+	private final ConsoleView view;
 	private List<Task> tasks = new ArrayList<>();
 	private AtomicInteger nextId = new AtomicInteger(0);
 
-	public TaskManager(TaskRepository repository) {
+	public TaskManager(TaskRepository repository, ConsoleView view) {
 		this.repository = repository;
+		this.view = view;
 		this.tasks = repository.load();
 		
 		// Determine highest ID from loaded tasks
@@ -38,7 +41,7 @@ public class TaskManager {
 		// Save task list to JSON file
 		repository.save(tasks);
 
-		System.out.println("Task added successfully (ID: " + newTask.getId() + ")");
+		view.showTaskAdded(newTask);
 	}
 
 	private int generateId() {
@@ -55,19 +58,21 @@ public class TaskManager {
 
 			Task task = tasks.get(i);
 			if(task.getId() == id) {
-				tasks.remove(i);
-				System.out.println("Task " + task.getId() + " deleted successfully");
+				tasks.remove(i);	
 				found = true;
 				break;
 			}
 		}
-
-		// Only persist change if a task was found
-		if(found) {
-			repository.save(tasks);
-		}else {
-			System.out.println("Task with id " + id + " not found.");
-		}	
+		
+		if(!found) {
+			view.showError("Task with id" + id + "not found.");
+			return;
+		}
+		
+		repository.save(tasks);
+		
+		view.showTaskDeleted(id);
+	
 	}
 
 	public void updateTask(int id, String newDescription) {
@@ -81,13 +86,15 @@ public class TaskManager {
 				break;
 			}
 		}
-
-		if(found) {
-			repository.save(tasks);
-			System.out.println("Task ID " + id + " updated successfully.");
-		}else {
-			System.out.println("Task ID " + id + " not found.");
+		
+		if(!found) {
+			view.showError("Task ID " + id + " not found.");
+			return;
 		}
+		
+		repository.save(tasks);
+		
+		view.showTaskUpdated(id);
 	}
 
 	public void listByStatus(String statusInput) {
@@ -97,43 +104,43 @@ public class TaskManager {
 			// Convert to enum and store the result
 			desiredStatus = Status.valueOf(statusInput.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			System.out.println("Error: Invalid status. Valid options are: " + Arrays.toString(Status.values()));
+			view.showError("Error: Invalid status. Valid options are: " + Arrays.toString(Status.values()));
 			return; // Exit if the input is invalid
 		}
 
 		if(tasks.isEmpty()) {
-			System.out.println("No tasks available.");
+			view.showTaskListIsEmpty();
 			return;
 		}
 
-		System.out.println("=== Tasks with status: " + desiredStatus.name() + " ===");
+		view.showStatusHeader(desiredStatus);
+		
 		boolean found = false;
 
 		// Loop and Filter
 		for(Task task : tasks) {
 			// Check if task's actual status matches the pre-converted desiredStatus
 			if(task.getStatus() == desiredStatus) {
-				System.out.println(task.toDisplayString());
+				view.showTask(task);
 				found = true;
 			}
 		}
 
-		// Print Not Found Message (if necessary)
 		if(!found) {
-			System.out.println("No task found with status: " + desiredStatus.name());
+			view.showError("No task found with status: " + desiredStatus.name());
+			return;
 		}
 	}
 
 	public void listAll() {
 		if (tasks.isEmpty()) {
-	        System.out.println("No tasks available.");
+			view.showTaskListIsEmpty();
 	        return;
 	    }
 		
-		System.out.println("=== All Tasks ===");
+		view.showTaskListHeader();
 		for (Task task : tasks) {
-			System.out.println(task.toDisplayString());
-
+			view.showTask(task);
 		}
 	}
 	
@@ -149,15 +156,17 @@ public class TaskManager {
 			}
 		}
 		
-		if(found) {
-			repository.save(tasks);
-			System.out.println("Task " + id + " marked as " + newStatus);
-		}else {
-			System.out.println("Task " + id + " not found.");
+		if(!found) {
+			view.showError("Task " + id + " not found.");
+			return;
 		}
 		
+		repository.save(tasks);
+		
+		view.showTaskStatusUpdated(id, newStatus);
+		
 	}
-	
+
 	public void markTaskAsDone(int id) {
 		updateTaskStatus(id, Status.DONE);
 		
