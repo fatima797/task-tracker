@@ -45,5 +45,29 @@ public class TaskTest {
 	    
 	    assertTrue(task.getUpdatedAt().isAfter(initialUpdateTime), "The updatedAt timestamp must be newer than the initial time");
 	}
+	
+	@Test
+	void defaultConstructorShouldSetStatusToTodo() {
+		Task task = new Task(1, "Test");
+		
+		assertEquals(Status.TODO, task.getStatus());
+	}
+	
+	@Test
+	void defaultConstructorShouldSetTimestampsNearNow() {
+		LocalDateTime before = LocalDateTime.now();
+		Task task = new Task(1, "Test");
+		LocalDateTime after = LocalDateTime.now();
+		
+		assertTrue(!task.getCreatedAt().isBefore(before) && !task.getCreatedAt().isAfter(after));
+		assertTrue(!task.getUpdatedAt().isBefore(before) && !task.getUpdatedAt().isAfter(after));
+	}
+	
+	@Test
+	void defaultConstructorShouldSetCreatedAtEqualToUpdatedAt() {
+		Task task = new Task(1, "Test");
+		
+		assertEquals(task.getCreatedAt(), task.getUpdatedAt());
+	}
 
 }
