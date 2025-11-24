@@ -1,7 +1,11 @@
 package com.github.fatima797.tasktracker.cli;
 
+import java.util.List;
+
+import com.github.fatima797.tasktracker.model.Task;
 import com.github.fatima797.tasktracker.repository.FileTaskRepository;
-import com.github.fatima797.tasktracker.service.TaskManager;
+import com.github.fatima797.tasktracker.service.TaskQueryService;
+import com.github.fatima797.tasktracker.service.TaskWriteService;
 import com.github.fatima797.tasktracker.view.ConsoleView;
 
 public class Main {
@@ -9,7 +13,9 @@ public class Main {
 	public static void main(String[] args) {
 		FileTaskRepository repository = new FileTaskRepository();
 		ConsoleView view = new ConsoleView();
-		TaskManager taskManager = new TaskManager(repository, view);
+		List<Task> tasks = repository.load();
+		TaskQueryService queryService = new TaskQueryService(tasks, view);
+		TaskWriteService writeService = new TaskWriteService(tasks, repository, view);
 
 		switch (args.length) {
 		case 0:
@@ -24,7 +30,7 @@ public class Main {
 			switch (command1) {
 			case "list":
 				// Command: java -jar task-tracker.jar list
-				taskManager.listAll();
+				queryService.listAll();
 				break;
 			default:
 				System.out.println("Error: Command '" + command1 + "' is unknown or requires additional arguments.");
@@ -38,13 +44,13 @@ public class Main {
 			switch(command2) {
 			case "add":
 				// Command: java -jar task-tracker.jar add "description"
-				taskManager.addTask(args[1]);
+				writeService.addTask(args[1]);
 				break;
 
 			case "delete":
 				// Command: java -jar task-tracker.jar delete ID
 				try {
-					taskManager.deleteTask(Integer.parseInt(args[1]));
+					writeService.deleteTask(Integer.parseInt(args[1]));
 				} catch (NumberFormatException e) {
 					System.out.println("Error: Delete command requires an integer ID.");
 				}
@@ -52,12 +58,12 @@ public class Main {
 
 			case "list":
 				// Command: java -jar task-tracker.jar list STATUS
-				taskManager.listByStatus(args[1]);
+				queryService.listByStatus(args[1]);
 				break;
 
 			case "mark-done":
 				try{
-					taskManager.markTaskAsDone(Integer.parseInt(args[1]));	
+					writeService.markTaskAsDone(Integer.parseInt(args[1]));	
 				}catch (NumberFormatException e) {
 					System.out.println("Error: mark-done command requires an integer ID");
 				}
@@ -65,7 +71,7 @@ public class Main {
 
 			case "mark-in-progress":
 				try {
-					taskManager.markInProgress(Integer.parseInt(args[1]));
+					writeService.markInProgress(Integer.parseInt(args[1]));
 				}catch (NumberFormatException e) {
 					System.out.println("Error: mark-in-progress command requires an integer ID");
 				}
@@ -84,7 +90,7 @@ public class Main {
 			case "update":
 				// Command: java -jar task-tracker.jar update ID "description"
 				try {
-					taskManager.updateTask(Integer.parseInt(args[1]), args[2]);
+					writeService.updateTask(Integer.parseInt(args[1]), args[2]);
 				} catch (NumberFormatException e) {
 					System.out.println("Error: update command requires an integer ID as the second argument.");
 				}
