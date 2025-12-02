@@ -1,30 +1,44 @@
 [
 {
-"id": 1,
-"description": "Buy groceries and cook dinner",
-"status": "IN_PROGRESS",
-"createdAt": "2025-10-23T11:10:37.526",
-"updatedAt": "2025-11-05T12:19:47.312"
-},
-{
 "id": 2,
 "description": "Walk dog",
-"status": "TODO",
+"status": "DONE",
 "createdAt": "2025-11-03T09:35:35.539",
-"updatedAt": "2025-11-05T11:32:41.209"
+"updatedAt": "2025-11-26T10:24:54.716"
 },
 {
 "id": 3,
 "description": "Pay phone bill",
-"status": "IN_PROGRESS",
+"status": "DONE",
 "createdAt": "2025-11-04T13:38:49.196",
-"updatedAt": "2025-11-07T17:10:00.764"
+"updatedAt": "2025-11-26T10:07:38.055"
 },
 {
-"id": 4,
-"description": "Call mom",
+"id": 5,
+"description": "Cook dinner",
+"status": "TODO",
+"createdAt": "2025-11-26T09:46:13.853",
+"updatedAt": "2025-11-26T09:46:13.854"
+},
+{
+"id": 6,
+"description": "Learn Java",
 "status": "IN_PROGRESS",
-"createdAt": "2025-11-07T17:10:27.216",
-"updatedAt": "2025-11-22T18:13:40.082"
+"createdAt": "2025-11-26T10:06:03.528",
+"updatedAt": "2025-11-26T10:20:06.592"
+},
+{
+"id": 7,
+"description": "Do house chores",
+"status": "TODO",
+"createdAt": "2025-11-26T10:23:37.843",
+"updatedAt": "2025-11-26T10:23:37.844"
+},
+{
+"id": 8,
+"description": "Read a chapter",
+"status": "TODO",
+"createdAt": "2025-11-26T10:24:16.320",
+"updatedAt": "2025-11-26T10:24:16.322"
 }
 ]

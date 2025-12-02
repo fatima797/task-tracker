@@ -1,129 +1,103 @@
 package com.github.fatima797.tasktracker.service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.github.fatima797.tasktracker.model.Status;
 import com.github.fatima797.tasktracker.model.Task;
 import com.github.fatima797.tasktracker.repository.TaskRepository;
 import com.github.fatima797.tasktracker.view.ConsoleView;
 
+/**
+ * Handles all commands that modify task state (create, update, delete, 
+ * and status changes). 
+ *
+ * <p>This service is the 'write' side of the CQS (Command Query Separation) 
+ * principle, ensuring all mutations occur in one place and are consistently 
+ * persisted through {@link TaskRepository}.</p>
+ *
+ * {@link ConsoleView} is injected to handle presentation.
+ */
+
 public class TaskWriteService {
-	private List<Task> tasks;
 	private final TaskRepository repository;
 	private final ConsoleView view;
-	private AtomicInteger nextId = new AtomicInteger(0);
-	
-	
-	public TaskWriteService(List<Task> tasks, TaskRepository repository, ConsoleView view) {
-		this.tasks = tasks;
+
+
+	public TaskWriteService(TaskRepository repository, ConsoleView view) {
 		this.repository = repository;
 		this.view = view;
-		
-		
-		int maxId = tasks.stream()
+	}	
+
+	private int generateNextId() {
+		return repository.findAll()
+				.stream()
 				.mapToInt(Task::getId)
 				.max()
-				.orElse(0);
-		
-		this.nextId.set(maxId);
-	}	
-	
-	private int generateId() {
-		int id = nextId.incrementAndGet();
-		return id;
+				.orElse(0) + 1;
 	}
-	
+
 	public void addTask(String description) {
 		// Generate unique ID based on highest existing task ID
-		int newId = generateId();
+		int newId = generateNextId();
 		Task newTask = new Task(newId, description);
-		// Add new task to in-memory list
-		tasks.add(newTask);
-
-		// Save task list to JSON file
-		repository.save(tasks);
-
+		repository.add(newTask);
 		view.showTaskAdded(newTask);
 	}
-	
-	public void deleteTask(int id) {
-		boolean found = false;
 
-		for(int i = 0; i < tasks.size(); i++) {
-			Task task = tasks.get(i);
-			if(task.getId() == id) {
-				tasks.remove(i);	
-				found = true;
-				break;
-			}
+	public void deleteTask(int id) {
+		boolean removed = repository.delete(id);
+
+		if (removed) {
+			view.showTaskDeleted(id);
+		} else {
+			view.showError("Task " + id + " not found.");
+
 		}
-		
-		if(!found) {
-			view.showError("Task with id" + id + "not found.");
-			return;
-		}
-		
-		repository.save(tasks);
-		
-		view.showTaskDeleted(id);
-	
 	}
 	
 	public void updateTask(int id, String newDescription) {
-		boolean found = false;
-
-		for(Task task : tasks) {
-			if(task.getId() == id) {
-				task.setDescription(newDescription);
-				task.updateTimestamp();
-				found = true;
-				break;
-			}
-		}
+		Task task = findTaskOrShowError(id);
 		
-		if(!found) {
-			view.showError("Task ID " + id + " not found.");
-			return;
-		}
-		
-		repository.save(tasks);
-		
+		if(task == null) return;
+			
+		task.setDescription(newDescription);
+		task.updateTimestamp();
+		repository.update(task);
 		view.showTaskUpdated(id);
+		
+	}
+
+	public void updateTaskStatus(int id, Status newStatus) {
+		Task task = findTaskOrShowError(id);
+		
+		if(task == null) return;
+		
+		task.setStatus(newStatus);
+		task.updateTimestamp(); 
+		repository.update(task);
+		view.showTaskStatusUpdated(id, newStatus);    
+
 	}
 	
-	public void updateTaskStatus(int id, Status newStatus) {
-		boolean found = false;
+	private Task findTaskOrShowError(int id) {
+		List<Task> all = repository.findAll();
 		
-		for(Task task : tasks) {
+		for(Task task : all) {
 			if(task.getId() == id) {
-				task.setStatus(newStatus);
-				task.updateTimestamp();
-				found = true;
-				break;
+				return task;
 			}
 		}
+		view.showError("Task " + id + " not found.");
 		
-		if(!found) {
-			view.showError("Task " + id + " not found.");
-			return;
-		}
-		
-		repository.save(tasks);
-		
-		view.showTaskStatusUpdated(id, newStatus);
-		
+		return null;
 	}
 	
+
 	public void markTaskAsDone(int id) {
 		updateTaskStatus(id, Status.DONE);
-		
 	}
-	
+
 	public void markInProgress(int id) {
 		updateTaskStatus(id, Status.IN_PROGRESS);
 	}
-	
-	
 
 }

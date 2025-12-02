@@ -3,6 +3,12 @@ package com.github.fatima797.tasktracker.view;
 import com.github.fatima797.tasktracker.model.Status;
 import com.github.fatima797.tasktracker.model.Task;
 
+/**
+ * Responsible solely for displaying output to the console.
+ * 
+ * <p>All business logic is performed in service classes, while this class 
+ * contains only formatting and output concerns</p> 
+ */
 public class ConsoleView {
 	
 	public void showTaskAdded(Task task) {
@@ -17,7 +23,7 @@ public class ConsoleView {
 		System.out.println("Task ID " + id + " updated successfully.");
 	}
 	
-	public void showTaskListIsEmpty() {
+	public void showTasksIsEmpty() {
 		System.out.println("No tasks available.");
 	}
 	
@@ -29,7 +35,7 @@ public class ConsoleView {
 		System.out.println(task.toDisplayString());
 	}
 
-	public void showTaskListHeader() {
+	public void showHeadingForAllTasks() {
 		System.out.println("=== All Tasks ===");
 	}
 	

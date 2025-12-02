@@ -1,9 +1,15 @@
 package com.github.fatima797.tasktracker.cli;
 
-import java.util.List;
-
-import com.github.fatima797.tasktracker.model.Task;
+import com.github.fatima797.tasktracker.cli.command.AddCommand;
+import com.github.fatima797.tasktracker.cli.command.Command;
+import com.github.fatima797.tasktracker.cli.command.CommandRegistry;
+import com.github.fatima797.tasktracker.cli.command.DeleteCommand;
+import com.github.fatima797.tasktracker.cli.command.ListCommand;
+import com.github.fatima797.tasktracker.cli.command.MarkDoneCommand;
+import com.github.fatima797.tasktracker.cli.command.MarkInProgressCommand;
+import com.github.fatima797.tasktracker.cli.command.UpdateCommand;
 import com.github.fatima797.tasktracker.repository.FileTaskRepository;
+import com.github.fatima797.tasktracker.repository.TaskRepository;
 import com.github.fatima797.tasktracker.service.TaskQueryService;
 import com.github.fatima797.tasktracker.service.TaskWriteService;
 import com.github.fatima797.tasktracker.view.ConsoleView;
@@ -11,99 +17,40 @@ import com.github.fatima797.tasktracker.view.ConsoleView;
 public class Main {
 
 	public static void main(String[] args) {
-		FileTaskRepository repository = new FileTaskRepository();
+		// Dependencies
 		ConsoleView view = new ConsoleView();
-		List<Task> tasks = repository.load();
-		TaskQueryService queryService = new TaskQueryService(tasks, view);
-		TaskWriteService writeService = new TaskWriteService(tasks, repository, view);
-
-		switch (args.length) {
-		case 0:
-			// Handles 0 arguments: java -jar task-tracker.jar 
-			System.out.println("Usage: java -jar task-tracker.jar <command> [arguments]");
-			break;
-
-		case 1:
-			// Handles 1 argument
-			String command1 = args[0].toLowerCase();
-
-			switch (command1) {
-			case "list":
-				// Command: java -jar task-tracker.jar list
-				queryService.listAll();
-				break;
-			default:
-				System.out.println("Error: Command '" + command1 + "' is unknown or requires additional arguments.");
-			}
-			break;
-
-		case 2:
-			// Handles 2 arguments
-			String command2 = args[0].toLowerCase();
-
-			switch(command2) {
-			case "add":
-				// Command: java -jar task-tracker.jar add "description"
-				writeService.addTask(args[1]);
-				break;
-
-			case "delete":
-				// Command: java -jar task-tracker.jar delete ID
-				try {
-					writeService.deleteTask(Integer.parseInt(args[1]));
-				} catch (NumberFormatException e) {
-					System.out.println("Error: Delete command requires an integer ID.");
-				}
-				break;
-
-			case "list":
-				// Command: java -jar task-tracker.jar list STATUS
-				queryService.listByStatus(args[1]);
-				break;
-
-			case "mark-done":
-				try{
-					writeService.markTaskAsDone(Integer.parseInt(args[1]));	
-				}catch (NumberFormatException e) {
-					System.out.println("Error: mark-done command requires an integer ID");
-				}
-				break;
-
-			case "mark-in-progress":
-				try {
-					writeService.markInProgress(Integer.parseInt(args[1]));
-				}catch (NumberFormatException e) {
-					System.out.println("Error: mark-in-progress command requires an integer ID");
-				}
-				break;
-
-			default:
-				System.out.println("Error: Unknown command '" + command2 + "'.");
-			}
-			break;
-
-		case 3:
-			// Handles 3 arguments
-			String command3 = args[0].toLowerCase();
-
-			switch(command3) {
-			case "update":
-				// Command: java -jar task-tracker.jar update ID "description"
-				try {
-					writeService.updateTask(Integer.parseInt(args[1]), args[2]);
-				} catch (NumberFormatException e) {
-					System.out.println("Error: update command requires an integer ID as the second argument.");
-				}
-				break;
-
-			default:
-				System.out.println("Error: Unknown command '" + command3 + "'.");
-			}
-			break;
-
-		default:
-			System.out.println("Error: Invalid number of arguments. Check usage for help." );
+		TaskRepository repository = new FileTaskRepository(view);
+		
+		// Services
+		TaskQueryService queryService = new TaskQueryService(repository, view);
+		TaskWriteService writeService = new TaskWriteService(repository, view);
+		
+		// Create Command registry and register commands
+		CommandRegistry registry = new CommandRegistry();
+		
+		registry.register("add", new AddCommand(writeService, view));
+		registry.register("delete", new DeleteCommand(writeService, view));
+		registry.register("update", new UpdateCommand(writeService, view));
+		registry.register("mark-done", new MarkDoneCommand(writeService, view));
+		registry.register("mark-in-progress", new MarkInProgressCommand(writeService, view));
+		
+		registry.register("list", new ListCommand(queryService, view));
+		
+		// If no argument provided
+		if(args.length == 0) {
+			view.showError("No command provided. Try: add, delete, list, update, mark-done, mark-in-progress.");
+			return;
 		}
+		
+		String commandName = args[0].toLowerCase();
+		
+		// If unknown command
+		if(!registry.has(commandName)) {
+			view.showError("Uknown command: " + commandName);
+			return;
+		}
+		
+		Command command = registry.get(commandName);
+		command.execute(args);
 	}
-
 }

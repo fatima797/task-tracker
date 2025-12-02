@@ -8,20 +8,31 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
 import com.github.fatima797.tasktracker.model.Status;
 import com.github.fatima797.tasktracker.model.Task;
+import com.github.fatima797.tasktracker.view.ConsoleView;
+
+/**
+ * File-based implementation of {@link TaskRepository}.
+ *
+ * Persists tasks to a JSON file and loads them back into memory.
+ */
 
 public class FileTaskRepository implements TaskRepository{
 	private static final String FILEPATH = "tasks/tasks.json";
-	private List<Task> tasksFromFile = new ArrayList<>();
+	private List<Task> tasks = new ArrayList<>();
+	private final ConsoleView view;
 	
-	public FileTaskRepository() {
-
+	public FileTaskRepository(ConsoleView view) {
+		this.tasks = loadTasksFromFile();
+		this.view = view;
 	}
 	
-	@Override
-	public void save(List<Task> tasks) {
+	public void saveToFile() {
 		Path path = Paths.get(FILEPATH);
 
 		// Use StringBuilder to construct JSON string
@@ -43,143 +54,195 @@ public class FileTaskRepository implements TaskRepository{
 		}
 		sb.append("]"); // Close the JSON array
 
-		// Convert the JSON content into bytes for file writing
-		byte[] content = sb.toString().getBytes(StandardCharsets.UTF_8);
-
 		try {
+			// Convert the JSON content into bytes for file writing
+			byte[] content = sb.toString().getBytes(StandardCharsets.UTF_8);
+			
 			// Make sure directory exists
 			Files.createDirectories(path.getParent()); 
 
 			// Write the byte content to the file (overwrites if already exists)
-			Files.write(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(path, 
+					content, 
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
 
 		} catch (IOException e) {
-			System.out.println("Failed to save tasks to file.");
+			view.showError("Error: Failed to save tasks to file.");
 			e.printStackTrace();
 		}
 
 	}
 	
-	@Override
-	public List<Task> load() {
-		tasksFromFile.clear();
+	/**
+	 * Loads tasks from a JSON file into memory by manually parsing JSON.
+	 * 
+	 * This method avoids using external libraries by:
+	 * - Reading raw file content as a string
+	 * - Removing array brackets and splitting individual task JSON objects
+	 * - Delegating each object to a parsing helper
+	 * 
+	 * @return a list of Task objects loaded from file
+	 */
+	
+	private List<Task> loadTasksFromFile() {
+		// Initialize list that will hold tasks loaded from file
+        List<Task> loadedTasks = new ArrayList<>();
+        Path path = Paths.get(FILEPATH);
 
-		// Define file path where tasks are stored
-		Path path = Paths.get(FILEPATH);
+        // If file does not exist, return empty list
+        if (!Files.exists(path)) {
+            return loadedTasks;
+        }
+        
+        try {
+        	// Read all lines from file into a single string
+            List<String> lines = Files.readAllLines(path);
+            StringBuilder sb = new StringBuilder();
+            
+            for (String line : lines) {
+                sb.append(line.trim()).append("\n");
+            }
 
+            String jsonContent = sb.toString()
+                .replace("[", "")
+                .replace("]", "")
+                .trim();
 
-		if (!Files.exists(path)) {
-			return tasksFromFile;
-		}
+            if (jsonContent.isEmpty()) {
+                return loadedTasks;
+            }
 
+         // Split string at into individual JSON object strings
+            String[] objectStrings = jsonContent.split("},\\s*");
+
+            for (int i = 0; i < objectStrings.length; i++) {
+                String objStr = objectStrings[i].trim();
+                if (i < objectStrings.length - 1) {
+                    objStr += "}"; // Add closing bracket if split removed it
+                }
+
+                // Delegate the JSON key-value parsing to a separate helper method
+                Task task = parseTaskFromJson(objStr);
+                
+                if (task != null) {
+                    loadedTasks.add(task);
+                }
+            }
+
+        } catch (IOException e) {
+        	view.showError("Error: Failed to read tasks.json");
+        	e.printStackTrace();
+        }
+
+        return loadedTasks;
+    }
+
+	
+	/**
+	 * Parses a single raw JSON object string and reconstructs a Task object.
+	 *
+	 * @param jsonObj the JSON string representing one task
+	 * @return the reconstructed Task object, or null if parsing fails
+	 */
+	private Task parseTaskFromJson(String jsonObj) {
+	
 		try {
-			// Read all lines from JSON file into list of strings
-			List<String> lines = Files.readAllLines(path);
+			// Remove enclosing brackets and whitespace
+            String cleaned = jsonObj.replace("{", "").replace("}", "").trim();
+            
+            // Split into individual key-value lines
+            String[] keyValueLines = cleaned.split(",\\s*");
 
-			// If file is empty, no tasks to load
-			if(lines.isEmpty()) {
-				return tasksFromFile;
-			}
+            int id = 0;
+            String description = "";
+            String status = "";
+            String createdAt = "";
+            String updatedAt = "";
 
-			// Accumulate all lines into StringBuilder for parsing
-			StringBuilder sb = new StringBuilder();
-			for(String line : lines) {
-				sb.append(line.trim()).append("\n");
+            for (String line : keyValueLines) {
+                String[] parts = line.split(":", 2);
+                if (parts.length < 2) continue;
 
-			}
+                String key = parts[0].trim().replace("\"", "");
+                String value = parts[1].trim().replace("\"", "");
 
-			// Convert combined text into a single JSON-like string
-			// and remove surrounding square brackets from JSON array
-			String jsonContent = sb.toString()
-					.replace("[", "")
-					.replace("]", "")
-					.trim();
+                switch (key) {
+                    case "id": id = Integer.parseInt(value); break;
+                    case "description": description = value; break;
+                    case "status": status = value; break;
+                    case "createdAt": createdAt = value; break;
+                    case "updatedAt": updatedAt = value; break;
+                }
+            }
 
-			// Split into individual object strings at "},"
-			String[] objectStrings = jsonContent.split("},\\s*");
+            // Reconstruct Task
+            return Task.restore(
+                id,
+                description,
+                Status.valueOf(status.toUpperCase()),
+                LocalDateTime.parse(createdAt),
+                LocalDateTime.parse(updatedAt)
+            );
 
-			// Keep track of highest ID (used later for ID generation)
-			int highestId = 0; 
-
-			// Parse each object string and convert into a Task instance
-			for(int i = 0; i < objectStrings.length; i++) {
-
-				String objStr = objectStrings[i].trim();
-
-				// Add closing } if it was removed during splitting
-				if(i < objectStrings.length - 1) {
-					objStr += "}";
-				}
-
-				try {
-					// Remove braces and split into key-value pairs
-					String object = objStr.replace("{", "").replace("}", "").trim();
-					String[] keyValueLines = object.split(",\\s*");
-
-					int id = 0;
-					String description = "";
-					String status = "";
-					String createdAt = "";
-					String updatedAt = "";
-
-					// Parse each key-value pair from the JSON object
-					for (String line : keyValueLines) {
-						String[] parts = line.split(":", 2); // Split at colon, limit to 2 parts
-
-						if (parts.length < 2) continue;
-
-						// Remove quotations
-						String key = parts[0].trim().replace("\"", "");
-						String value = parts[1].trim().replace("\"", "");
-
-						// Map JSON keys to Task properties
-						switch (key) {
-						case "id":
-							id = Integer.parseInt(value);
-							if (id > highestId) {
-								highestId = id;
-							}
-							break;
-						case "description":
-							description = value;
-							break;
-						case "status":
-							status = value;
-							break;
-						case "createdAt":
-							createdAt = value;
-							break;
-						case "updatedAt":
-							updatedAt = value;
-							break;
-						default:
-							System.out.println("Unrecognized key: " + key);
-						}
-					}
-
-					// Restore a Task object using parsed values from JSON file
-					Task task = Task.restore(
-							id, 
-							description, 
-							Status.valueOf(status.toUpperCase()), 
-							LocalDateTime.parse(createdAt), 
-							LocalDateTime.parse(updatedAt));
-
-					// Add constructed Task to in-memory task list
-					tasksFromFile.add(task);
-
-				} catch (Exception e) {
-					System.out.println("Failed to parse a task. Skipping it.");
-					e.printStackTrace();
-				}
-			}
-
-		} catch (IOException e) {
-			System.out.println("Failed to read tasks.json");
-			e.printStackTrace();
-		}
-		
-		return tasksFromFile;
+        } catch (Exception e) {
+        	view.showError("Error: Failed to parse a Task JSON object.");
+            e.printStackTrace();
+            return null;
+        }
 	}
+
+	@Override
+	public List<Task> findAll() {
+		return new ArrayList<>(tasks);
+	}
+
+	@Override
+	public Optional<Task> findById(int id) {
+		return tasks.stream()
+				.filter(task -> task.getId() == id)
+				.findFirst();
+	}
+
+	@Override
+	public void add(Task task) {
+		tasks.add(task);
+		saveToFile();	
+	}
+
+	@Override
+	public boolean delete(int id) {
+		boolean removed = tasks.removeIf(task -> task.getId() == id);
+		if(removed) {
+			saveToFile();
+		}
+		return removed;		
+	}
+
+	@Override
+	public boolean update(Task updatedTask) {
+		for (Task task: tasks) {
+			if(task.getId() == updatedTask.getId()) {
+				task.setDescription(updatedTask.getDescription());
+				task.setStatus(updatedTask.getStatus());
+				task.updateTimestamp();
+				saveToFile();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public List<Task> findByStatus(Status status) {
+		List<Task> tasksWithMatchingStatus = new ArrayList<>();
+		for(Task task : tasks) {
+			if(task.getStatus() == status) {
+				tasksWithMatchingStatus.add(task);
+			}
+		}
+		return tasksWithMatchingStatus;
+	}
+	
 
 }
