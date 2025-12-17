@@ -24,11 +24,10 @@ import com.github.fatima797.tasktracker.view.ConsoleView;
 
 public class FileTaskRepository implements TaskRepository{
 	private static final String FILEPATH = "tasks/tasks.json";
-	private List<Task> tasks = new ArrayList<>();
+	private List<Task> tasks = null;
 	private final ConsoleView view;
 	
 	public FileTaskRepository(ConsoleView view) {
-		this.tasks = loadTasksFromFile();
 		this.view = view;
 	}
 	
@@ -191,27 +190,54 @@ public class FileTaskRepository implements TaskRepository{
             return null;
         }
 	}
+	
+	private void ensureTasksLoaded() {
+		if(tasks == null) {
+			tasks = loadTasksFromFile();
+		}
+	}
 
 	@Override
 	public List<Task> findAll() {
+		ensureTasksLoaded();
 		return new ArrayList<>(tasks);
 	}
 
 	@Override
 	public Optional<Task> findById(int id) {
+		ensureTasksLoaded();
 		return tasks.stream()
 				.filter(task -> task.getId() == id)
 				.findFirst();
 	}
-
+	
+	@Override
+	public List<Task> findByStatus(Status status) {
+		ensureTasksLoaded();
+		List<Task> tasksWithMatchingStatus = new ArrayList<>();
+		for(Task task : tasks) {
+			if(task.getStatus() == status) {
+				tasksWithMatchingStatus.add(task);
+			}
+		}
+		return tasksWithMatchingStatus;
+	}
+	
 	@Override
 	public void add(Task task) {
+		if(tasks == null) {
+			ensureTasksLoaded();
+		}
 		tasks.add(task);
 		saveToFile();	
 	}
 
 	@Override
 	public boolean delete(int id) {
+		if(tasks == null) {
+			ensureTasksLoaded();
+		}
+		
 		boolean removed = tasks.removeIf(task -> task.getId() == id);
 		if(removed) {
 			saveToFile();
@@ -221,6 +247,10 @@ public class FileTaskRepository implements TaskRepository{
 
 	@Override
 	public boolean update(Task updatedTask) {
+		if(tasks == null) {
+			ensureTasksLoaded();
+		}
+		
 		for (Task task: tasks) {
 			if(task.getId() == updatedTask.getId()) {
 				task.setDescription(updatedTask.getDescription());
@@ -231,18 +261,5 @@ public class FileTaskRepository implements TaskRepository{
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public List<Task> findByStatus(Status status) {
-		List<Task> tasksWithMatchingStatus = new ArrayList<>();
-		for(Task task : tasks) {
-			if(task.getStatus() == status) {
-				tasksWithMatchingStatus.add(task);
-			}
-		}
-		return tasksWithMatchingStatus;
-	}
-	
-
+	}	
 }

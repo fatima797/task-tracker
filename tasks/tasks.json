@@ -2,9 +2,9 @@
 {
 "id": 2,
 "description": "Walk dog",
-"status": "DONE",
+"status": "IN_PROGRESS",
 "createdAt": "2025-11-03T09:35:35.539",
-"updatedAt": "2025-11-26T10:24:54.716"
+"updatedAt": "2025-12-17T09:57:31.584"
 },
 {
 "id": 3,
@@ -16,9 +16,9 @@
 {
 "id": 5,
 "description": "Cook dinner",
-"status": "TODO",
+"status": "DONE",
 "createdAt": "2025-11-26T09:46:13.853",
-"updatedAt": "2025-11-26T09:46:13.854"
+"updatedAt": "2025-12-17T09:55:39.093"
 },
 {
 "id": 6,
@@ -30,15 +30,15 @@
 {
 "id": 7,
 "description": "Do house chores",
-"status": "TODO",
+"status": "DONE",
 "createdAt": "2025-11-26T10:23:37.843",
-"updatedAt": "2025-11-26T10:23:37.844"
+"updatedAt": "2025-12-17T09:55:43.834"
 },
 {
 "id": 8,
-"description": "Read a chapter",
-"status": "TODO",
-"createdAt": "2025-11-26T10:24:16.320",
-"updatedAt": "2025-11-26T10:24:16.322"
+"description": "Read for 30min",
+"status": "IN_PROGRESS",
+"createdAt": "2025-12-17T09:53:04.816",
+"updatedAt": "2025-12-17T09:54:17.106"
 }
 ]
